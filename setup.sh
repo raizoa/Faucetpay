@@ -3,8 +3,6 @@
 set -u
 
 REPO="https://github.com/raizoa/Faucetpay"
-RAW="https://raw.githubusercontent.com/raizoa/Faucetpay/main"
-
 INSTALL_DIR="$HOME/Faucetpay"
 TMP_DIR="$HOME/.faucetpay_install"
 
@@ -17,22 +15,12 @@ echo "       FAUCETPAY AUTO INSTALLER"
 echo "=========================================="
 echo ""
 
-# ------------------------------------------------------------
-# 1. UPDATE TERMUX
-# ------------------------------------------------------------
-
-echo "[1/8] Updating Termux packages..."
-
+echo "[1/7] Updating Termux..."
 pkg update -y
 pkg upgrade -y
 
-# ------------------------------------------------------------
-# 2. INSTALL REQUIRED TERMUX PACKAGES
-# ------------------------------------------------------------
-
 echo ""
-echo "[2/8] Installing required packages..."
-
+echo "[2/7] Installing required packages..."
 pkg install -y \
     python \
     php \
@@ -42,34 +30,28 @@ pkg install -y \
     unzip \
     git
 
-# ------------------------------------------------------------
-# 3. STORAGE PERMISSION
-# ------------------------------------------------------------
+echo ""
+echo "[3/7] Checking Android storage..."
+
+if [ ! -d "$HOME/storage/shared" ]; then
+    echo "Storage permission has not been configured."
+    echo "Please allow Termux storage permission."
+    termux-setup-storage
+else
+    echo "Storage already configured."
+fi
 
 echo ""
-echo "[3/8] Setting up Android storage..."
-
-termux-setup-storage
-
-# ------------------------------------------------------------
-# 4. CREATE INSTALL DIRECTORY
-# ------------------------------------------------------------
-
-echo ""
-echo "[4/8] Preparing Faucetpay directory..."
+echo "[4/7] Preparing installation directory..."
 
 rm -rf "$TMP_DIR"
-mkdir -p "$TMP_DIR"
-
 rm -rf "$INSTALL_DIR"
+
+mkdir -p "$TMP_DIR"
 mkdir -p "$INSTALL_DIR"
 
-# ------------------------------------------------------------
-# 5. DOWNLOAD REPOSITORY
-# ------------------------------------------------------------
-
 echo ""
-echo "[5/8] Downloading Faucetpay..."
+echo "[5/7] Downloading Faucetpay..."
 
 cd "$TMP_DIR"
 
@@ -79,35 +61,26 @@ curl -L \
 
 if [ ! -s faucetpay.zip ]; then
     echo ""
-    echo "ERROR: Failed to download Faucetpay."
+    echo "ERROR: Download failed."
     exit 1
 fi
 
-echo "Extracting files..."
+echo "Extracting..."
 
 unzip -q faucetpay.zip
 
 if [ ! -d "$TMP_DIR/Faucetpay-main" ]; then
     echo ""
-    echo "ERROR: Extracted repository not found."
+    echo "ERROR: Repository extraction failed."
     exit 1
 fi
 
 cp -r "$TMP_DIR/Faucetpay-main"/. "$INSTALL_DIR"/
 
-# ------------------------------------------------------------
-# 6. INSTALL PYTHON DEPENDENCIES
-# ------------------------------------------------------------
-
 echo ""
-echo "[6/8] Upgrading pip..."
+echo "[6/7] Installing Python dependencies..."
 
-python -m pip install --upgrade pip
-
-echo ""
-echo "[7/8] Installing Python dependencies..."
-
-pip install -U \
+python -m pip install \
     seledroid \
     telethon \
     rich \
@@ -125,24 +98,12 @@ pip install -U \
     bas-http \
     skipcha
 
-# ------------------------------------------------------------
-# 7. PERMISSIONS
-# ------------------------------------------------------------
-
 echo ""
-echo "[8/8] Setting executable permissions..."
+echo "[7/7] Setting permissions..."
 
 find "$INSTALL_DIR" -type f -name "*.sh" -exec chmod +x {} \;
 
-# ------------------------------------------------------------
-# CLEANUP
-# ------------------------------------------------------------
-
 rm -rf "$TMP_DIR"
-
-# ------------------------------------------------------------
-# FINISHED
-# ------------------------------------------------------------
 
 echo ""
 echo "=========================================="
@@ -150,15 +111,23 @@ echo "       FAUCETPAY INSTALLATION DONE"
 echo "=========================================="
 echo ""
 
-echo "Installed at:"
+echo "Location:"
 echo "$INSTALL_DIR"
 
 echo ""
-echo "Contents:"
+echo "Files:"
 ls -la "$INSTALL_DIR"
 
 echo ""
+echo "Python:"
+python --version
+
+echo ""
+echo "Pip:"
+pip --version
+
+echo ""
 echo "=========================================="
-echo "Installation completed successfully."
+echo "       INSTALLATION COMPLETE"
 echo "=========================================="
 echo ""
