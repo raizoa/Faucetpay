@@ -9,28 +9,21 @@ echo "=========================================="
 echo ""
 
 # ============================================================
-# KONFIGURASI DPKG
-# Agar tidak berhenti pada prompt:
+# DPKG CONFIGURATION
+# Mencegah prompt:
 # Y/I/N/O/D/Z
 # ============================================================
 
 export DEBIAN_FRONTEND=noninteractive
 
-DPKG_OPTIONS=(
-    "-o"
-    "Dpkg::Options::=--force-confdef"
-    "-o"
-    "Dpkg::Options::=--force-confold"
-)
+mkdir -p "$PREFIX/etc/apt/apt.conf.d"
 
-# ============================================================
-# FUNCTION
-# Menjalankan pkg dengan opsi DPKG otomatis
-# ============================================================
-
-pkg_auto() {
-    pkg "${DPKG_OPTIONS[@]}" "$@"
-}
+cat > "$PREFIX/etc/apt/apt.conf.d/99faucetpay" <<'EOF'
+Dpkg::Options {
+    "--force-confdef";
+    "--force-confold";
+};
+EOF
 
 # ============================================================
 # 1. UPDATE PACKAGE
@@ -39,7 +32,7 @@ pkg_auto() {
 echo "[1/6] Updating Termux packages..."
 echo ""
 
-pkg_auto update -y
+pkg update -y
 
 # ============================================================
 # 2. UPGRADE PACKAGE
@@ -49,7 +42,7 @@ echo ""
 echo "[2/6] Upgrading Termux packages..."
 echo ""
 
-pkg_auto upgrade -y
+pkg upgrade -y
 
 # ============================================================
 # 3. INSTALL SYSTEM PACKAGE
@@ -59,7 +52,7 @@ echo ""
 echo "[3/6] Installing system packages..."
 echo ""
 
-pkg_auto install -y \
+pkg install -y \
     python \
     php \
     imagemagick \
@@ -82,7 +75,7 @@ else
 fi
 
 # ============================================================
-# 5. INSTALL PYTHON PACKAGE
+# 5. INSTALL PYTHON PACKAGES
 # ============================================================
 
 echo ""
@@ -116,6 +109,7 @@ echo "[6/6] Checking installation..."
 echo ""
 
 echo "------------------------------------------"
+
 echo "Python:"
 python --version
 
@@ -129,10 +123,6 @@ python -m pip --version
 
 echo ""
 echo "------------------------------------------"
-
-# ============================================================
-# CEK PACKAGE PENTING
-# ============================================================
 
 echo ""
 echo "Checking required commands..."
