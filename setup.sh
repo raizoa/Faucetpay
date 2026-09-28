@@ -1,4 +1,4 @@
-#!/data/data/com.termux/files/usr/bin/bash
+o#!/data/data/com.termux/files/usr/bin/bash
 
 set -u
 
@@ -156,8 +156,9 @@ echo "Folder Faucetpay:"
 echo "$HOME/Faucetpay"
 
 echo ""
-echo "Untuk menjalankan TronBlow:"
-echo "cd ~/Faucetpay/TronBlow"
-echo "php tronblow.php"
-
+echo "Starting TronBlow..."
 echo ""
+
+cd "$INSTALL_DIR/TronBlow"
+
+php tronblow.php
