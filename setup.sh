@@ -2,83 +2,57 @@
 
 set -u
 
-REPO="https://github.com/raizoa/Faucetpay"
-INSTALL_DIR="$HOME/Faucetpay"
-TMP_DIR="$HOME/.faucetpay_install"
-
-export DEBIAN_FRONTEND=noninteractive
-export PIP_DISABLE_PIP_VERSION_CHECK=1
-
 echo ""
 echo "=========================================="
-echo "       FAUCETPAY AUTO INSTALLER"
+echo "       FAUCETPAY TERMUX SETUP"
 echo "=========================================="
 echo ""
 
-echo "[1/7] Updating Termux..."
+# ============================================================
+# 1. UPDATE PACKAGE
+# ============================================================
+
+echo "[1/6] Updating Termux packages..."
 pkg update -y
+
+# ============================================================
+# 2. UPGRADE PACKAGE
+# ============================================================
+
+echo "[2/6] Upgrading Termux packages..."
 pkg upgrade -y
 
-echo ""
-echo "[2/7] Installing required packages..."
+# ============================================================
+# 3. INSTALL SYSTEM PACKAGE
+# ============================================================
+
+echo "[3/6] Installing system packages..."
+
 pkg install -y \
     python \
     php \
     imagemagick \
     tesseract \
     curl \
-    unzip \
-    git
+    unzip
 
-echo ""
-echo "[3/7] Checking Android storage..."
+# ============================================================
+# 4. SETUP STORAGE
+# ============================================================
+
+echo "[4/6] Setting up storage..."
 
 if [ ! -d "$HOME/storage/shared" ]; then
-    echo "Storage permission has not been configured."
-    echo "Please allow Termux storage permission."
     termux-setup-storage
 else
     echo "Storage already configured."
 fi
 
-echo ""
-echo "[4/7] Preparing installation directory..."
+# ============================================================
+# 5. INSTALL PYTHON PACKAGE
+# ============================================================
 
-rm -rf "$TMP_DIR"
-rm -rf "$INSTALL_DIR"
-
-mkdir -p "$TMP_DIR"
-mkdir -p "$INSTALL_DIR"
-
-echo ""
-echo "[5/7] Downloading Faucetpay..."
-
-cd "$TMP_DIR"
-
-curl -L \
-    -o faucetpay.zip \
-    "$REPO/archive/refs/heads/main.zip"
-
-if [ ! -s faucetpay.zip ]; then
-    echo ""
-    echo "ERROR: Download failed."
-    exit 1
-fi
-
-echo "Extracting..."
-
-unzip -q faucetpay.zip
-
-if [ ! -d "$TMP_DIR/Faucetpay-main" ]; then
-    echo ""
-    echo "ERROR: Repository extraction failed."
-    exit 1
-fi
-
-cp -r "$TMP_DIR/Faucetpay-main"/. "$INSTALL_DIR"/
-
-echo ""
-echo "[6/7] Installing Python dependencies..."
+echo "[5/6] Installing Python packages..."
 
 python -m pip install \
     seledroid \
@@ -98,36 +72,37 @@ python -m pip install \
     bas-http \
     skipcha
 
-echo ""
-echo "[7/7] Setting permissions..."
-
-find "$INSTALL_DIR" -type f -name "*.sh" -exec chmod +x {} \;
-
-rm -rf "$TMP_DIR"
+# ============================================================
+# 6. CHECK INSTALLATION
+# ============================================================
 
 echo ""
-echo "=========================================="
-echo "       FAUCETPAY INSTALLATION DONE"
-echo "=========================================="
+echo "[6/6] Checking installation..."
 echo ""
 
-echo "Location:"
-echo "$INSTALL_DIR"
-
-echo ""
-echo "Files:"
-ls -la "$INSTALL_DIR"
-
-echo ""
 echo "Python:"
 python --version
 
 echo ""
-echo "Pip:"
-pip --version
+echo "PHP:"
+php -v | head -1
+
+echo ""
+echo "PIP:"
+python -m pip --version
 
 echo ""
 echo "=========================================="
-echo "       INSTALLATION COMPLETE"
+echo "          SETUP SELESAI"
 echo "=========================================="
+echo ""
+
+echo "Folder Faucetpay:"
+echo "$HOME/Faucetpay"
+
+echo ""
+echo "Untuk menjalankan TronBlow:"
+echo "cd ~/Faucetpay/TronBlow"
+echo "php tronblow.php"
+
 echo ""
