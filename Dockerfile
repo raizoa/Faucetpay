@@ -12,4 +12,4 @@ COPY . /app
 
 WORKDIR /app/TronBlow
 
-CMD ["php", "-r", "echo 'TronBlow runtime ready | PHP=' . PHP_VERSION . PHP_EOL;"]
+CMD ["php", "-r", "echo 'TronBlow runtime ready | PHP=' . PHP_VERSION . PHP_EOL; while (true) { sleep(60); }"]
