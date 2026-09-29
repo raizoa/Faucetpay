@@ -3,18 +3,33 @@
 declare(strict_types=1);
 
 echo "=====================================\n";
-echo " Railway Cloud Network TEST\n";
+echo " RAILWAY CLOUD MONITOR WORKER\n";
 echo "=====================================\n";
 
 $appMode = getenv('APP_MODE') ?: 'not-set';
+$startTime = time();
 
-echo "APP_MODE: {$appMode}\n";
-echo "PHP: " . PHP_VERSION . "\n";
-echo "Container started: " . date('Y-m-d H:i:s') . "\n";
+echo "APP_MODE : {$appMode}\n";
+echo "PHP      : " . PHP_VERSION . "\n";
+echo "OS       : " . PHP_OS . "\n";
+echo "START    : " . date('Y-m-d H:i:s') . "\n";
 
-function testUrl(string $url): void
+function formatBytes(int $bytes): string
 {
-    echo "\nTesting: {$url}\n";
+    if ($bytes >= 1024 * 1024) {
+        return round($bytes / 1024 / 1024, 2) . " MB";
+    }
+
+    if ($bytes >= 1024) {
+        return round($bytes / 1024, 2) . " KB";
+    }
+
+    return $bytes . " B";
+}
+
+function testInternet(): void
+{
+    $url = 'https://example.com';
 
     $context = stream_context_create([
         'http' => [
@@ -34,21 +49,47 @@ function testUrl(string $url): void
     $elapsed = round(microtime(true) - $start, 3);
 
     if ($result !== false) {
-        echo "SUCCESS | {$elapsed}s | " . strlen($result) . " bytes\n";
+        echo "Internet   : ONLINE | {$elapsed}s | "
+           . strlen($result)
+           . " bytes\n";
     } else {
-        echo "FAILED | {$elapsed}s\n";
+        echo "Internet   : FAILED | {$elapsed}s\n";
     }
 }
 
-testUrl('https://example.com');
+echo "\n";
+testInternet();
 
 echo "\n=====================================\n";
-echo "Worker mulai berjalan...\n";
+echo " WORKER STARTED\n";
 echo "=====================================\n";
+
+$counter = 0;
 
 while (true) {
 
-    echo "[" . date('Y-m-d H:i:s') . "] Cloud worker aktif\n";
+    $counter++;
+
+    $uptime = time() - $startTime;
+
+    $memory = memory_get_usage(true);
+    $peakMemory = memory_get_peak_usage(true);
+
+    echo "["
+        . date('Y-m-d H:i:s')
+        . "] ";
+
+    echo "RUN #{$counter}";
+
+    echo " | Uptime: {$uptime}s";
+
+    echo " | RAM: "
+        . formatBytes($memory);
+
+    echo " | Peak: "
+        . formatBytes($peakMemory);
+
+    echo "\n";
 
     sleep(60);
 }
