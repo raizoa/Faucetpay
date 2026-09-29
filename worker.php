@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 echo "=====================================\n";
-echo " RAILWAY CLOUD MONITOR WORKER\n";
+echo " RAILWAY PHP CLOUD WORKER\n";
 echo "=====================================\n";
 
-$appMode = getenv('APP_MODE') ?: 'not-set';
+$appMode = getenv('APP_MODE') ?: 'production';
+
 $startTime = time();
+$counter = 0;
 
 echo "APP_MODE : {$appMode}\n";
 echo "PHP      : " . PHP_VERSION . "\n";
@@ -17,26 +19,22 @@ echo "START    : " . date('Y-m-d H:i:s') . "\n";
 function formatBytes(int $bytes): string
 {
     if ($bytes >= 1024 * 1024) {
-        return round($bytes / 1024 / 1024, 2) . " MB";
+        return round($bytes / 1024 / 1024, 2) . ' MB';
     }
 
     if ($bytes >= 1024) {
-        return round($bytes / 1024, 2) . " KB";
+        return round($bytes / 1024, 2) . ' KB';
     }
 
-    return $bytes . " B";
+    return $bytes . ' B';
 }
 
-function testInternet(): void
+function testInternet(): bool
 {
     $url = 'https://example.com';
 
     $context = stream_context_create([
         'http' => [
-            'timeout' => 10,
-            'method' => 'GET',
-        ],
-        'https' => [
             'timeout' => 10,
             'method' => 'GET',
         ],
@@ -49,22 +47,24 @@ function testInternet(): void
     $elapsed = round(microtime(true) - $start, 3);
 
     if ($result !== false) {
-        echo "Internet   : ONLINE | {$elapsed}s | "
-           . strlen($result)
-           . " bytes\n";
-    } else {
-        echo "Internet   : FAILED | {$elapsed}s\n";
+        echo "Internet : ONLINE | {$elapsed}s | "
+            . strlen($result)
+            . " bytes\n";
+
+        return true;
     }
+
+    echo "Internet : FAILED | {$elapsed}s\n";
+
+    return false;
 }
 
-echo "\n";
+echo "\nInitial network test:\n";
 testInternet();
 
 echo "\n=====================================\n";
 echo " WORKER STARTED\n";
 echo "=====================================\n";
-
-$counter = 0;
 
 while (true) {
 
@@ -90,6 +90,13 @@ while (true) {
         . formatBytes($peakMemory);
 
     echo "\n";
+
+    /*
+     * Tes koneksi setiap 5 menit.
+     */
+    if ($counter % 5 === 0) {
+        testInternet();
+    }
 
     sleep(60);
 }
